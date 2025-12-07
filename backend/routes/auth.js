@@ -7,7 +7,7 @@ const jwt = require("jsonwebtoken");
 
 //Signup
 router.post("/signup",async(req,res)=>{
-    try{
+    try{                                
         const{name ,email , password} = req.body;
 
         if(!name || !email || !password){
@@ -21,7 +21,11 @@ router.post("/signup",async(req,res)=>{
 
         const user = await User.create({name,email,password:hashed});
 
-        res.json({message:"Signup Successfull",user});
+        const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+      expiresIn: "1d",
+    });
+
+        res.json({message:"Signup Successfull",token,user:{ id: user._id, name: user.name, email: user.email }});
     }
     catch(err){
            console.log(err);
@@ -42,7 +46,11 @@ router.post("/login",async(req,res)=>{
 
             const token = jwt.sign({id:user._id},process.env.JWT_SECRET,{expiresIn:"1d"});
 
-            res.json({message:"Login Successfull",token});
+            res.json({
+            message: "Login Successful",
+            token,
+            user: { id: user._id, name: user.name, email: user.email },
+            });
     }
     catch(err){
            console.log(err);
@@ -53,13 +61,18 @@ router.post("/login",async(req,res)=>{
 //Protected Route(Dashboard)
 router.get("/dashboard",(req,res)=>{
     try{
-        const token = req.headers.authorization?.split(" ")[1];
+        const authHeader = req.headers.authorization;
+        if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return res.status(401).json({ message: "No token provided" });
+    }
 
-        if(!token) return res.status(400).json({message:"No token"});
+        const token = authHeader.split(" ")[1];
 
-        const decoded = jwt.verify(token,process.env.JWT_SECRET);
+          const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-        res.json({message:"Welcome User" ,userId:decoded.id});
+          res.json({ message: "Welcome User", userId: decoded.id });
+
+
     }
     catch(err){
            console.log(err);

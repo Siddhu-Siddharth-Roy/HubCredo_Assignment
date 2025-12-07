@@ -14,7 +14,11 @@ const Signup =()=> {
     e.preventDefault();
     try {
       const res = await axios.post("https://hubcredo-assignment-qopl.onrender.com/api/auth/signup", form);
+      if (res.data.token) {
+        localStorage.setItem("token", res.data.token);
+      }
       alert(res.data.message);
+      
       navigate("/dashboard");
     } catch (err) {
       alert(err.response?.data?.message || "Signup failed");
