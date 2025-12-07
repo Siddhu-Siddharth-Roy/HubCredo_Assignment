@@ -13,12 +13,10 @@ app.use(cors({
   methods: "GET,POST",
 }));
 
-mongoose.connect(process.env.MONGO_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-})
-.then(() => console.log("MongoDB Connected"))
-.catch(err => console.log("DB Error:", err));
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => console.log("MongoDB Connected"))
+  .catch(err => console.log("DB Error:", err));
+
 app.use("/api/auth",authRoutes);
 
 app.listen(PORT,()=>console.log(`Server running on port ${PORT}`));
